@@ -8,57 +8,61 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GameField implements Serializable {
-    private int pointsCount;
-    private int squaresCount;
+    private final int pointsLength;
+    private final int squaresLength;
 
-    private Map<Point, Integer> squares;
-    private List<Line> lines;
+    private final Map<Point, Integer> squares;
+    private final List<Line> lines;
 
-    public GameField(int squaresCount) {
-        this.squaresCount = squaresCount;
-        pointsCount = squaresCount + 1;
+    private final int squaresCount;
+    private int filledSquaresCount = 0;
 
-        squares = new ConcurrentHashMap<>(squaresCount);
-        lines = new ArrayList<>(3 * (pointsCount - 1) * (pointsCount - 1));
+    public GameField(int squaresLength) {
+        this.squaresLength = squaresLength;
+        pointsLength = squaresLength + 1;
+        squaresCount = squaresLength * squaresLength;
+
+        squares = new ConcurrentHashMap<>(squaresLength);
+        lines = new ArrayList<>(3 * (pointsLength - 1) * (pointsLength - 1));
     }
 
-    public int getPointsCount() {
-        return pointsCount;
+    public int getPointsLength() {
+        return pointsLength;
     }
 
-    public void setPointsCount(int pointsCount) {
-        this.pointsCount = pointsCount;
+    /*public void setPointsCount(int pointsLength) {
+        this.pointsLength = pointsLength;
+    }*/
+
+    public int getSquaresLength() {
+        return squaresLength;
     }
 
-    public int getSquaresCount() {
-        return squaresCount;
-    }
-
-    public void setSquaresCount(int squaresCount) {
-        this.squaresCount = squaresCount;
-    }
+    /*public void setSquaresCount(int squaresLength) {
+        this.squaresLength = squaresLength;
+    }*/
 
     public Map<Point, Integer> getSquares() {
         return squares;
     }
 
-    public void setSquares(Map<Point, Integer> squares) {
+    /*public void setSquares(Map<Point, Integer> squares) {
         this.squares = squares;
-    }
+    }*/
 
     public List<Line> getLines() {
         return lines;
     }
 
-    public void setLines(List<Line> lines) {
+    /*public void setLines(List<Line> lines) {
         this.lines = lines;
-    }
+    }*/
 
     public boolean isReachable(Point point) {
         return point.getX() >= 0 &&
-            point.getX() < pointsCount &&
+            point.getX() < pointsLength &&
             point.getY() >= 0 &&
-            point.getY() < pointsCount;
+            point.getY() < pointsLength;
     }
 
     public boolean isLockLeft(Line line) {
@@ -89,7 +93,7 @@ public class GameField implements Serializable {
         return isLockSide;
     }
 
-    public List<Line> getPossibleNeighborLines(Line line) {
+    /*public List<Line> getPossibleNeighborLines(Line line) {
         LinkedList<Line> neighbors = new LinkedList<>();
 
         if(isBoundary(line)) {
@@ -144,7 +148,7 @@ public class GameField implements Serializable {
         }
 
         return neighbors;
-    }
+    }*/
 
     public List<Line> getPossibleBotNeighbors(Line line) {
         List<Line> neighbors = new LinkedList<>();
@@ -207,7 +211,7 @@ public class GameField implements Serializable {
     }
 
     public boolean isTopBoundary(Line line) {
-        return line.isHorizontalLine() && line.getFrom().getY() == pointsCount - 1;
+        return line.isHorizontalLine() && line.getFrom().getY() == pointsLength - 1;
     }
 
     public boolean isBottomBoundary(Line line) {
@@ -219,7 +223,41 @@ public class GameField implements Serializable {
     }
 
     public boolean isRightBoundary(Line line) {
-        return line.isVerticalLine() && line.getFrom().getX() == pointsCount - 1;
+        return line.isVerticalLine() && line.getFrom().getX() == pointsLength - 1;
+    }
+
+    public void setLockOnBottom(Line line, Integer clientOrder) {
+        squares.put(getOnLockSquarePoint(line, 0, -1), clientOrder);
+        filledSquaresCount++;
+    }
+
+    public void setLockOnTop(Line line, Integer clientOrder) {
+        squares.put(getOnLockSquarePoint(line, 0, 0), clientOrder);
+        filledSquaresCount++;
+    }
+
+    public void setLockOnLeft(Line line, Integer clientOrder) {
+        squares.put(getOnLockSquarePoint(line, -1, 0), clientOrder);
+        filledSquaresCount++;
+    }
+
+    public void setLockOnRight(Line line, Integer clientOrder) {
+        squares.put(getOnLockSquarePoint(line, 0, 0), clientOrder);
+        filledSquaresCount++;
+    }
+
+    private Point getOnLockSquarePoint(Line line, Integer xDelta, Integer yDelta) {
+        return new Point(
+                line.getFrom().getX() + xDelta,
+                line.getFrom().getY() + yDelta);
+    }
+
+    public boolean isAllSqaresFilled() {
+        return filledSquaresCount == squaresCount;
+    }
+
+    private int getFilledSquaresCount() {
+        return filledSquaresCount;
     }
 
     @Override
@@ -227,22 +265,22 @@ public class GameField implements Serializable {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         GameField gameField = (GameField) object;
-        return pointsCount == gameField.pointsCount &&
-                squaresCount == gameField.squaresCount &&
+        return pointsLength == gameField.pointsLength &&
+                squaresLength == gameField.squaresLength &&
                 Objects.equals(squares, gameField.squares) &&
                 Objects.equals(lines, gameField.lines);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pointsCount, squaresCount, squares, lines);
+        return Objects.hash(pointsLength, squaresLength, squares, lines);
     }
 
     @Override
     public String toString() {
         return "GameField{" +
-                "pointsCount=" + pointsCount +
-                ", squaresCount=" + squaresCount +
+                "pointsLength=" + pointsLength +
+                ", squaresLength=" + squaresLength +
                 ", squares=" + squares +
                 ", lines=" + lines +
                 '}';

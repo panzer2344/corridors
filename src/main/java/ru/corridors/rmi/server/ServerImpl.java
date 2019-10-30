@@ -1,9 +1,6 @@
 package ru.corridors.rmi.server;
 
-import ru.corridors.dto.ClientInfo;
-import ru.corridors.dto.Line;
-import ru.corridors.dto.Point;
-import ru.corridors.dto.StepInfo;
+import ru.corridors.dto.*;
 import ru.corridors.dto.gamefield.GameField;
 
 import java.rmi.AlreadyBoundException;
@@ -12,19 +9,25 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerImpl implements Server {
     public static final String UNIQUE_BINDING_NAME = "binding.server";
-    private static int DEFAULT_SQUARE_COUNT = 5;
+    private static int DEFAULT_SQUARE_COUNT = 1;
 
     private static int clientCount = 0;
     private static int currentClient = 0;
 
     private static final GameField gameField = new GameField(DEFAULT_SQUARE_COUNT);
 
+    private static final Map<Integer, ClientInfo> clientsMap = new ConcurrentHashMap<>();
+
     @Override
     public synchronized ClientInfo registerClient() throws RemoteException {
         ClientInfo clientInfo = new ClientInfo(clientCount);
+        clientsMap.put(clientCount, clientInfo);
         clientCount++;
 
         System.out.println("Client with id#" + clientInfo.getOrderNumber() + " was registered");
@@ -35,7 +38,7 @@ public class ServerImpl implements Server {
 
     @Override
     public void giveControl(ClientInfo clientInfo) throws RemoteException {
-        while (currentClient != clientInfo.getOrderNumber() || clientCount < 2) {
+        while (currentClient != clientInfo.getOrderNumber() || clientCount < 2 || isFinished()) {
             System.out.println("Try to get control by " + clientInfo.getOrderNumber());
             System.out.println("Current client count: " + clientCount);
             try {
@@ -66,23 +69,27 @@ public class ServerImpl implements Server {
 
             if (currentLine.isHorizontalLine()) {
                 if (gameField.isLockBot(currentLine)) {
-                    gameField.getSquares().put(
+                    gameField.setLockOnBottom(currentLine, clientInfo.getOrderNumber());
+                    /*gameField.getSquares().put(
                             new Point(currentLine.getFrom().getX(), currentLine.getFrom().getY() - 1),
-                            clientInfo.getOrderNumber());
+                            clientInfo.getOrderNumber());*/
                 } else if (gameField.isLockTop(currentLine)) {
-                    gameField.getSquares().put(
+                    gameField.setLockOnTop(currentLine, clientInfo.getOrderNumber());
+                    /*gameField.getSquares().put(
                             new Point(currentLine.getFrom().getX(), currentLine.getFrom().getY()),
-                            clientInfo.getOrderNumber());
+                            clientInfo.getOrderNumber());*/
                 }
             } else if (currentLine.isVerticalLine()) {
                 if (gameField.isLockLeft(currentLine)) {
-                    gameField.getSquares().put(
+                    gameField.setLockOnLeft(currentLine, clientInfo.getOrderNumber());
+                    /*gameField.getSquares().put(
                             new Point(currentLine.getFrom().getX() - 1, currentLine.getFrom().getY()),
-                            clientInfo.getOrderNumber());
+                            clientInfo.getOrderNumber());*/
                 } else if (gameField.isLockRight(currentLine)) {
-                    gameField.getSquares().put(
+                    gameField.setLockOnRight(currentLine, clientInfo.getOrderNumber());
+                    /*gameField.getSquares().put(
                             new Point(currentLine.getFrom().getX(), currentLine.getFrom().getY()),
-                            clientInfo.getOrderNumber());
+                            clientInfo.getOrderNumber());*/
                 }
             }
 
@@ -107,6 +114,37 @@ public class ServerImpl implements Server {
     @Override
     public GameField getGamefield() throws RemoteException {
         return gameField;
+    }
+
+    @Override
+    public boolean isFinished() throws RemoteException {
+        return gameField.isAllSqaresFilled();
+    }
+
+    @Override
+    public GameResults getResults() throws RemoteException {
+        Map<ClientInfo, ClientScore> results = new HashMap<>(clientCount);
+        ClientInfo winner = null;
+        int maxScore = 0;
+
+        for(Integer clientOrder : gameField.getSquares().values()) {
+            ClientInfo clientInfo = clientsMap.get(clientOrder);
+            ClientScore clientScore = null;
+            if(results.containsKey(clientInfo)) {
+                clientScore = results.get(clientInfo);
+            } else {
+                clientScore = new ClientScore(1);
+                results.put(clientInfo, clientScore);
+
+            }
+
+            if(clientScore.getSquareCount() > maxScore) {
+                maxScore = clientScore.getSquareCount();
+                winner = clientInfo;
+            }
+        }
+
+        return new GameResults(winner, results);
     }
 
     public static void main(String[] args) throws RemoteException, AlreadyBoundException, InterruptedException {
