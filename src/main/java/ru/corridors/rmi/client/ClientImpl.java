@@ -9,7 +9,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Scanner;
-import java.util.function.Function;
 
 public class ClientImpl implements Client {
     public static final String UNIQUE_BINDING_NAME = "binding.server";
@@ -118,40 +117,41 @@ public class ClientImpl implements Client {
 
         GameField gameField = null;
 
-        client.registerClient(server);
+        client.init(server);
+        client.registerClient();
         while (true) {
-            client.takeControl(server);
+            client.takeControl();
             //client.tryDo(() -> client.takeControl());
             //client.tryDo(() -> client.takeControl(), null);
             //client.tryDo(() -> client.takeControl(), null);
 
-            isFinised = client.checkOnFinished(server);
+            isFinised = client.checkOnFinished();
             if(isFinised)
                 break;
 
-            gameField = client.takeGamefield(server);
+            gameField = client.takeGamefield();
             System.out.println(gameField);
 
             StepInfo stepInfo = null;
             boolean isCorrect = true;
             do {
                 stepInfo = client.takeStepArgs(scanner);
-                isCorrect = client.checkArgs(stepInfo, server);
+                isCorrect = client.checkArgs(stepInfo);
                 System.out.println("isCorrect: " + isCorrect);
             }
             while ( ! isCorrect );
 
             if (isCorrect) {
-                client.registerArgs(stepInfo, server);
+                client.registerArgs(stepInfo);
             }
 
-            gameField = client.takeGamefield(server);
+            gameField = client.takeGamefield();
             System.out.println(gameField);
 
-            client.giveUpControl(server);
+            client.giveUpControl();
         }
 
-        GameResults results = client.getResults(server);
+        GameResults results = client.getResults();
         System.out.println(results);
     }
 }

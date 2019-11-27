@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerImpl implements Server {
     public static final String UNIQUE_BINDING_NAME = "binding.server";
-    private static int DEFAULT_SQUARE_COUNT = 1;
+    public static final int DEFAULT_SQUARE_COUNT = 1;
 
     private static int clientCount = 0;
     private static int currentClient = 0;
@@ -25,7 +25,7 @@ public class ServerImpl implements Server {
     private static final Map<Integer, ClientInfo> clientsMap = new ConcurrentHashMap<>();
 
     @Override
-    public synchronized ClientInfo registerClient() throws RemoteException {
+    public synchronized ClientInfo registerClient()  {
         ClientInfo clientInfo = new ClientInfo(clientCount);
         clientsMap.put(clientCount, clientInfo);
         clientCount++;
@@ -38,7 +38,7 @@ public class ServerImpl implements Server {
 
     @Override
     public void giveControl(ClientInfo clientInfo) throws RemoteException {
-        while (currentClient != clientInfo.getOrderNumber() || clientCount < 2 || isFinished()) {
+        while ( (currentClient != clientInfo.getOrderNumber() || clientCount < 2 ) && !isFinished()) {
             System.out.println("Try to get control by " + clientInfo.getOrderNumber());
             System.out.println("Current client count: " + clientCount);
             try {
@@ -50,7 +50,7 @@ public class ServerImpl implements Server {
     }
 
     @Override
-    public boolean checkArgs(StepInfo stepInfo, ClientInfo clientInfo) throws RemoteException {
+    public boolean checkArgs(StepInfo stepInfo, ClientInfo clientInfo) {
         boolean alreadyOnGameField = gameField.getLines().contains(stepInfo.getLine());
         boolean isReachable = gameField.isReachable(stepInfo.getLine().getFrom()) &&
                 gameField.isReachable(stepInfo.getLine().getTo());
@@ -61,7 +61,7 @@ public class ServerImpl implements Server {
     }
 
     @Override
-    public boolean registerArgs(StepInfo stepInfo, ClientInfo clientInfo) throws RemoteException {
+    public boolean registerArgs(StepInfo stepInfo, ClientInfo clientInfo) {
         synchronized (gameField) {
             Line currentLine = stepInfo.getLine();
 
@@ -70,26 +70,14 @@ public class ServerImpl implements Server {
             if (currentLine.isHorizontalLine()) {
                 if (gameField.isLockBot(currentLine)) {
                     gameField.setLockOnBottom(currentLine, clientInfo.getOrderNumber());
-                    /*gameField.getSquares().put(
-                            new Point(currentLine.getFrom().getX(), currentLine.getFrom().getY() - 1),
-                            clientInfo.getOrderNumber());*/
                 } else if (gameField.isLockTop(currentLine)) {
                     gameField.setLockOnTop(currentLine, clientInfo.getOrderNumber());
-                    /*gameField.getSquares().put(
-                            new Point(currentLine.getFrom().getX(), currentLine.getFrom().getY()),
-                            clientInfo.getOrderNumber());*/
                 }
             } else if (currentLine.isVerticalLine()) {
                 if (gameField.isLockLeft(currentLine)) {
                     gameField.setLockOnLeft(currentLine, clientInfo.getOrderNumber());
-                    /*gameField.getSquares().put(
-                            new Point(currentLine.getFrom().getX() - 1, currentLine.getFrom().getY()),
-                            clientInfo.getOrderNumber());*/
                 } else if (gameField.isLockRight(currentLine)) {
                     gameField.setLockOnRight(currentLine, clientInfo.getOrderNumber());
-                    /*gameField.getSquares().put(
-                            new Point(currentLine.getFrom().getX(), currentLine.getFrom().getY()),
-                            clientInfo.getOrderNumber());*/
                 }
             }
 
@@ -112,17 +100,17 @@ public class ServerImpl implements Server {
     }
 
     @Override
-    public GameField getGamefield() throws RemoteException {
+    public GameField getGamefield()  {
         return gameField;
     }
 
     @Override
-    public boolean isFinished() throws RemoteException {
+    public boolean isFinished() {
         return gameField.isAllSqaresFilled();
     }
 
     @Override
-    public GameResults getResults() throws RemoteException {
+    public GameResults getResults() {
         Map<ClientInfo, ClientScore> results = new HashMap<>(clientCount);
         ClientInfo winner = null;
         int maxScore = 0;
