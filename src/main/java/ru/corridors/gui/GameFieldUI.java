@@ -59,12 +59,14 @@ public class GameFieldUI extends JComponent {
             List<Line> row = new ArrayList<>(linesCountY + 1);
 
             for(int j = 0; j < linesCountY + 1; j++) {
+                // to exclude horizontal line for last column of points ( or will NPE )
                 if(j < linesCountY) {
                     Line lineHorizontal = new Line(points.get(i).get(j), points.get(i).get(j + 1));
                     add(lineHorizontal);
                     row.add(lineHorizontal);
                 }
 
+                // to exclude vertical line for last row of points ( or will NPE )
                 if(i < linesCountY) {
                     Line lineVertical = new Line(points.get(i).get(j), points.get(i + 1).get(j));
                     row.add(lineVertical);
