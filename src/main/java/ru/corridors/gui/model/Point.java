@@ -7,12 +7,17 @@ import java.awt.*;
 
 public class Point extends JComponent {
 
+    private int _x;
+    private int _y;
     private int radius;
+
     private State state = State.NOT_ACTIVE;
 
     public Point(int x, int y, int radius) {
         super();
 
+        this._x = x;
+        this._y = y;
         this.radius = radius;
 
         setLocation(x - radius, y - radius);
@@ -23,7 +28,7 @@ public class Point extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        System.out.println("paint");
+        //System.out.println("paint");
         g.setColor(state.color);
         g.fillRoundRect(0, 0, 2 * radius, 2 * radius, 2 * radius, 2 * radius);
     }
@@ -45,5 +50,21 @@ public class Point extends JComponent {
         State(Color color) {
             this.color = color;
         }
+    }
+
+    public int get_X() {
+        return _x;
+    }
+
+    public int get_Y() {
+        return _y;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public State getState() {
+        return state;
     }
 }

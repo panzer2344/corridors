@@ -5,62 +5,73 @@ import ru.corridors.gui.model.Point;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.List;
 
-public class GameFieldUI extends JComponent implements MouseListener {
+public class GameFieldUI extends JComponent {
 
-    private Point point;
-    private Point point1;
+    private static final int pointRadius = 5;
+    private static final int linesCountY = 10;
 
-    private Line line;
+    private List<List<Point>> points;
+    private List<List<Line>> lines;
 
     public GameFieldUI() {
         super();
-        //setBounds(100, 100, 500, 500);
 
         setLocation(0, 0);
         setSize(200, 200);
         setBackground(Color.DARK_GRAY);
 
-        point = new Point(50, 50, 20);
-        point1 = new Point(100, 150, 20);
-
-        add(point);
-        add(point1);
-
-        line = new Line(50, 50, 100, 150);
-        add(line);
+        initPoints();
+        initLines();
     }
 
-//    @Override
-//    protected void paintComponent(Graphics g) {
-//        //System.out.println("paint");
-//        point.paintComponents(g);
-//    }
+    private void initPoints() {
+        int x = 20;
+        int y = 20;
+        int delta = 25;
 
-    @Override
-    public void mouseClicked(MouseEvent mouseEvent) {
+        points = new ArrayList<>(linesCountY + 1);
+        for(int i = 0; i < linesCountY + 1; i++) {
+            List<Point> row = new ArrayList<>(linesCountY + 1);
 
+            for(int j = 0; j < linesCountY + 1; j++) {
+                Point point = new Point(x, y, pointRadius);
+
+                row.add(point);
+                add(point);
+
+                x += 2 * pointRadius + delta;
+            }
+
+            points.add(row);
+
+            x = 20;
+            y += 2 * pointRadius + delta;
+        }
     }
 
-    @Override
-    public void mousePressed(MouseEvent mouseEvent) {
+    private void initLines() {
+        lines = new ArrayList<>(linesCountY + 1);
 
-    }
+        for(int i = 0; i < linesCountY + 1; i++) {
+            List<Line> row = new ArrayList<>(linesCountY + 1);
 
-    @Override
-    public void mouseReleased(MouseEvent mouseEvent) {
+            for(int j = 0; j < linesCountY + 1; j++) {
+                if(j < linesCountY) {
+                    Line lineHorizontal = new Line(points.get(i).get(j), points.get(i).get(j + 1));
+                    add(lineHorizontal);
+                    row.add(lineHorizontal);
+                }
 
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent mouseEvent) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent mouseEvent) {
+                if(i < linesCountY) {
+                    Line lineVertical = new Line(points.get(i).get(j), points.get(i + 1).get(j));
+                    row.add(lineVertical);
+                    add(lineVertical);
+                }
+            }
+        }
 
     }
 
@@ -73,5 +84,6 @@ public class GameFieldUI extends JComponent implements MouseListener {
         jFrame.getContentPane().add(new GameFieldUI());
         //jFrame.getContentPane().add(new Point(150, 150, 20));
         jFrame.setVisible(true);
+        //jFrame.repaint();
     }
 }
