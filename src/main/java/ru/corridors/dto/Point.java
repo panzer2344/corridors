@@ -43,7 +43,7 @@ public class Point implements Serializable {
 
     @Override
     public String toString() {
-        return "Point{" +
+        return "UIPoint{" +
                 "x=" + x +
                 ", y=" + y +
                 '}';

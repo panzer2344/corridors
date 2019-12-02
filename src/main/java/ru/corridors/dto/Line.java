@@ -179,7 +179,7 @@ public class Line implements Serializable {
 
     @Override
     public String toString() {
-        return "Line{" +
+        return "UILine{" +
                 "from=" + from +
                 ", to=" + to +
                 '}';

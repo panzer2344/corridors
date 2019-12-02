@@ -4,21 +4,32 @@ import ru.corridors.gui.handler.ClickHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Point extends JComponent {
+public class UIPoint extends JComponent {
 
     private int _x;
     private int _y;
     private int radius;
 
+    private int indexHor;
+    private int indexVert;
+
     private State state = State.NOT_ACTIVE;
 
-    public Point(int x, int y, int radius) {
-        super();
+    private List<UILine> connections;
 
+    public UIPoint(int x, int y, int radius) {
+        super();
+        init(x, y, radius);
+    }
+
+    private void init(int x, int y, int radius) {
         this._x = x;
         this._y = y;
         this.radius = radius;
+        this.connections = new ArrayList<>(4);
 
         setLocation(x - radius, y - radius);
         setSize(2 * radius, 2 * radius);
@@ -28,28 +39,13 @@ public class Point extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //System.out.println("paint");
-        g.setColor(state.color);
+        g.setColor(state.getColor());
         g.fillRoundRect(0, 0, 2 * radius, 2 * radius, 2 * radius, 2 * radius);
     }
 
     public void setState(State state) {
         this.state = state;
         repaint();
-    }
-
-    public enum  State {
-        NOT_ACTIVE(Color.GRAY),
-        ACTIVE_FIRST_PLAYER(Color.BLUE),
-        ACTIVE_SECOND_PLAYER(Color.RED),
-        CHOOSED_FIRST_PLAYER(Color.CYAN),
-        CHOOSED_SECOND_PLAYER(Color.MAGENTA);
-
-        private Color color;
-
-        State(Color color) {
-            this.color = color;
-        }
     }
 
     public int get_X() {
@@ -66,5 +62,25 @@ public class Point extends JComponent {
 
     public State getState() {
         return state;
+    }
+
+    public List<UILine> getConnections() {
+        return connections;
+    }
+
+    public int getIndexHor() {
+        return indexHor;
+    }
+
+    public void setIndexHor(int indexHor) {
+        this.indexHor = indexHor;
+    }
+
+    public int getIndexVert() {
+        return indexVert;
+    }
+
+    public void setIndexVert(int indexVert) {
+        this.indexVert = indexVert;
     }
 }

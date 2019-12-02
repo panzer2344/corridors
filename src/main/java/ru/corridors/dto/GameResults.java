@@ -18,17 +18,9 @@ public class GameResults implements Serializable {
         return winner;
     }
 
-    /*public void setWinner(ClientInfo winner) {
-        this.winner = winner;
-    }*/
-
     public Map<ClientInfo, ClientScore> getResults() {
         return results;
     }
-
-    /*public void setResults(Map<ClientInfo, ClientScore> results) {
-        this.results = results;
-    }*/
 
     @Override
     public boolean equals(Object object) {

@@ -1,7 +1,8 @@
 package ru.corridors.gui;
 
-import ru.corridors.gui.model.Line;
-import ru.corridors.gui.model.Point;
+import ru.corridors.gui.model.UILine;
+import ru.corridors.gui.model.UIPoint;
+import ru.corridors.rmi.server.ServerImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,10 +12,10 @@ import java.util.List;
 public class GameFieldUI extends JComponent {
 
     private static final int pointRadius = 5;
-    private static final int linesCountY = 10;
+    private static final int linesCountY = ServerImpl.DEFAULT_SQUARE_COUNT;
 
-    private List<List<Point>> points;
-    private List<List<Line>> lines;
+    private List<List<UIPoint>> points;
+    private List<List<UILine>> lines;
 
     public GameFieldUI() {
         super();
@@ -34,13 +35,15 @@ public class GameFieldUI extends JComponent {
 
         points = new ArrayList<>(linesCountY + 1);
         for(int i = 0; i < linesCountY + 1; i++) {
-            List<Point> row = new ArrayList<>(linesCountY + 1);
+            List<UIPoint> row = new ArrayList<>(linesCountY + 1);
 
             for(int j = 0; j < linesCountY + 1; j++) {
-                Point point = new Point(x, y, pointRadius);
+                UIPoint uiPoint = new UIPoint(x, y, pointRadius);
+                uiPoint.setIndexVert(i);
+                uiPoint.setIndexHor(j);
 
-                row.add(point);
-                add(point);
+                row.add(uiPoint);
+                add(uiPoint);
 
                 x += 2 * pointRadius + delta;
             }
@@ -56,36 +59,38 @@ public class GameFieldUI extends JComponent {
         lines = new ArrayList<>(linesCountY + 1);
 
         for(int i = 0; i < linesCountY + 1; i++) {
-            List<Line> row = new ArrayList<>(linesCountY + 1);
+            List<UILine> row = new ArrayList<>(linesCountY + 1);
 
             for(int j = 0; j < linesCountY + 1; j++) {
                 // to exclude horizontal line for last column of points ( or will NPE )
                 if(j < linesCountY) {
-                    Line lineHorizontal = new Line(points.get(i).get(j), points.get(i).get(j + 1));
+                    UILine lineHorizontal = new UILine(points.get(i).get(j), points.get(i).get(j + 1));
                     add(lineHorizontal);
                     row.add(lineHorizontal);
+
+                    points.get(i).get(j).getConnections().add(lineHorizontal);
+                    points.get(i).get(j + 1).getConnections().add(lineHorizontal);
                 }
 
                 // to exclude vertical line for last row of points ( or will NPE )
                 if(i < linesCountY) {
-                    Line lineVertical = new Line(points.get(i).get(j), points.get(i + 1).get(j));
+                    UILine lineVertical = new UILine(points.get(i).get(j), points.get(i + 1).get(j));
                     row.add(lineVertical);
                     add(lineVertical);
+
+                    points.get(i).get(j).getConnections().add(lineVertical);
+                    points.get(i + 1).get(j).getConnections().add(lineVertical);
                 }
             }
         }
 
     }
 
-    public static void main(String[] args) {
-        JFrame jFrame = new JFrame();
-        jFrame.setBounds(100, 100, 500, 500);
-        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jFrame.setLayout(new BorderLayout());
-        jFrame.setLocationRelativeTo(null);
-        jFrame.getContentPane().add(new GameFieldUI());
-        //jFrame.getContentPane().add(new Point(150, 150, 20));
-        jFrame.setVisible(true);
-        //jFrame.repaint();
+    public List<List<UIPoint>> getPoints() {
+        return points;
+    }
+
+    public List<List<UILine>> getLines() {
+        return lines;
     }
 }

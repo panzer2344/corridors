@@ -19,10 +19,6 @@ public class ClientScore implements Serializable {
         return this;
     }
 
-    /*public void setSquareCount(Integer squareCount) {
-        this.squareCount = squareCount;
-    }*/
-
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
