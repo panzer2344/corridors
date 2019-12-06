@@ -16,7 +16,7 @@ public class UIPoint extends JComponent {
     private int indexHor;
     private int indexVert;
 
-    private State state = State.NOT_ACTIVE;
+    private State state = State.NOT_ACTIVE_POINT;
 
     private List<UILine> connections;
 
@@ -82,5 +82,17 @@ public class UIPoint extends JComponent {
 
     public void setIndexVert(int indexVert) {
         this.indexVert = indexVert;
+    }
+
+    public UILine getConnection(UIPoint anotherPoint) {
+        //System.out.println("this._x " + _x + " this._y" + _y + "another._x " + anotherPoint._x + "another._y " + anotherPoint._y);
+        for(UILine connectedLine : connections) {
+            //System.out.println(connectedLine);
+            if(connectedLine.getVertex().a.equals(anotherPoint) || connectedLine.getVertex().b.equals(anotherPoint)) {
+                //System.out.println("connected");
+                return connectedLine;
+            }
+        }
+        return null;
     }
 }

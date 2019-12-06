@@ -1,6 +1,5 @@
 package ru.corridors.gui;
 
-import ru.corridors.dto.ClientInfo;
 import ru.corridors.gui.handler.OpponentHandler;
 
 import javax.swing.*;

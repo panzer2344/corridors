@@ -68,9 +68,14 @@ public class GameField implements Serializable {
     private boolean isLockSide(Line line, List<Line> sideLines) {
         boolean isLockSide = true;
 
+//        for(Line neighbor : sideLines) {
+//            if ( ! sideLines.contains )
+//        }
+
         for(Line neighbor : sideLines) {
             if( ! lines.contains(neighbor) ) {
                 isLockSide = false;
+                break;
             }
         }
 

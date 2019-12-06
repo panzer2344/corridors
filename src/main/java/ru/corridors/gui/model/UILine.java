@@ -2,6 +2,8 @@ package ru.corridors.gui.model;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.font.GlyphVector;
+import java.awt.geom.Line2D;
 import java.util.Map;
 
 public class UILine extends JComponent {
@@ -11,9 +13,11 @@ public class UILine extends JComponent {
     private int toX;
     private int toY;
 
-    private final Stroke stroke = new BasicStroke(5);
+    private final Stroke stroke = new BasicStroke(6.0f);
 
     private Pair<UIPoint, UIPoint> vertex;
+
+    private State state = State.NOT_ACTIVE_LINE;
 
     public UILine(UIPoint from, UIPoint to) {
         super();
@@ -31,7 +35,7 @@ public class UILine extends JComponent {
         int y0 = Math.min(fromY, toY);
 
         setLocation(x0, y0);
-        setSize(Math.max(Math.abs(toX - fromX), 2), Math.max(Math.abs(toY - fromY), 2));
+        setSize(Math.max(Math.abs(toX - fromX), 10), Math.max(Math.abs(toY - fromY), 10));
 
         this.fromX = fromX - x0;
         this.fromY = fromY - y0;
@@ -45,7 +49,7 @@ public class UILine extends JComponent {
         super.paintComponent(g);
 
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setColor(Color.BLACK);
+        g2d.setColor(state.getColor());
         g2d.setStroke(stroke);
         g2d.drawLine(fromX, fromY, toX, toY);
     }
@@ -53,4 +57,23 @@ public class UILine extends JComponent {
     public Pair<UIPoint, UIPoint> getVertex() {
         return vertex;
     }
+
+    public UILine setState(State state) {
+        this.state = state;
+        repaint();
+        return this;
+    }
+
+//    @Override
+//    public String toString() {
+//        return "UILine{" +
+//                "fromX=" + fromX +
+//                ", fromY=" + fromY +
+//                ", toX=" + toX +
+//                ", toY=" + toY +
+//                ", stroke=" + stroke +
+//                ", vertex=" + vertex +
+//                ", state=" + state +
+//                '}';
+//    }
 }

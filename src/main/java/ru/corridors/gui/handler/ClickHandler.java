@@ -1,10 +1,10 @@
 package ru.corridors.gui.handler;
 
-import ru.corridors.dto.ClientInfo;
 import ru.corridors.dto.Line;
 import ru.corridors.dto.Point;
 import ru.corridors.dto.StepInfo;
 import ru.corridors.gui.model.State;
+import ru.corridors.gui.model.UILine;
 import ru.corridors.gui.model.UIPoint;
 import ru.corridors.gui.validator.AllowStepValidator;
 import ru.corridors.gui.validator.ConnectValidator;
@@ -20,13 +20,14 @@ public class ClickHandler implements MouseListener {
 
     private Validator<Void> allowStepValidator = AllowStepValidator.instance;
     private Validator<StepInfo> fillLineValidator = FillLineValidator.instance;
-    private FillLineHandler fillLineHandler = FillLineHandler.instance;
+    private RegisterStepAction registerStepAction = RegisterStepAction.instance;
 
     private UIPoint first;
     private UIPoint second;
 
     private UIPoint lastMissedPoint;
     private State missedPointPrevState;
+    private State firstPointPrevState;
 
     private ClickHandler() {}
 
@@ -45,32 +46,63 @@ public class ClickHandler implements MouseListener {
 
             if(first == null) {
                 first = point;
+                firstPointPrevState = first.getState();
                 first.setState(State.CHOOSING_FIRST_PLAYER);
             } else {
-                if(new ConnectValidator(first).isValid(point)) {
-                    second = point;
+                second = point;
+                StepInfo stepInfo = buildStepInfo(first, second);
 
-                    StepInfo stepInfo = buildStepInfo(first, second);
+                if(new ConnectValidator(first).isValid(point) && fillLineValidator.isValid(stepInfo)) {
+                    if(first.getState().isChangableState()) first.setState(State.ACTIVE_FIRST_PLAYER);
 
-                    if(fillLineValidator.isValid(stepInfo)) {
-                        first.setState(State.ACTIVE_FIRST_PLAYER);
-                        second.setState(State.ACTIVE_FIRST_PLAYER);
+                    if(second.getState().isChangableState()) second.setState(State.ACTIVE_FIRST_PLAYER);
 
-                        fillLineHandler.handle(stepInfo);
-
-                        clearLinks();
-                    } else {
-                        second = null;
+                    UILine connectionLine = first.getConnection(second);
+                    if(connectionLine != null) {
+                        connectionLine.setState(State.ACTIVE_FIRST_PLAYER);
                     }
 
+                    registerStepAction.doAction(stepInfo);
+
+                    clearLinks();
                 } else {
                     lastMissedPoint = point;
                     missedPointPrevState = lastMissedPoint.getState();
                     lastMissedPoint.setState(State.MISSED_POINT);
-                    first.setState(State.NOT_ACTIVE);
+                    //first.setState(State.NOT_ACTIVE_POINT);
+                    first.setState(firstPointPrevState);
 
                     clearLinks();
                 }
+//                if(new ConnectValidator(first).isValid(point)) {
+//                    second = point;
+//
+//                    StepInfo stepInfo = buildStepInfo(first, second);
+//
+//                    if(fillLineValidator.isValid(stepInfo)) {
+//                        first.setState(State.ACTIVE_FIRST_PLAYER);
+//                        second.setState(State.ACTIVE_FIRST_PLAYER);
+//
+//                        UILine connectionLine = first.getConnection(second);
+//                        if(connectionLine != null) {
+//                            connectionLine.setState(State.ACTIVE_FIRST_PLAYER);
+//                        }
+//
+//                        registerStepAction.doAction(stepInfo);
+//
+//                        clearLinks();
+//                    } else {
+//                        second = null;
+//                    }
+//
+//                } else {
+//                    lastMissedPoint = point;
+//                    missedPointPrevState = lastMissedPoint.getState();
+//                    lastMissedPoint.setState(State.MISSED_POINT);
+//                    first.setState(State.NOT_ACTIVE_POINT);
+//
+//                    clearLinks();
+//                }
             }
         } else {
             clearLinks();

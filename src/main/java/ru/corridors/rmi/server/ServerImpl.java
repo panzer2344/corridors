@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerImpl implements Server {
-    public static final int DEFAULT_SQUARE_COUNT = 1;
+    public static final int DEFAULT_SQUARE_COUNT = 2;
 
     private static int clientCount = 0;
     private static int currentClient = 0;
@@ -69,10 +69,10 @@ public class ServerImpl implements Server {
     public boolean registerStep(StepInfo stepInfo, ClientInfo clientInfo) throws RemoteException {
         synchronized (gameField) {
             if(currentClient != clientInfo.getOrderNumber()) return false;
-            if(isFinished()) {
-                sendResults(getResults());
-                return false;
-            }
+//            if(isFinished()) {
+//                sendResults(getResults());
+//                return false;
+//            }
 
             Line currentLine = stepInfo.getLine();
 
@@ -95,6 +95,13 @@ public class ServerImpl implements Server {
 
             sendStepToAnotherPlayers(stepInfo, clientInfo);
             changeActivePlayer();
+
+            System.out.println(gameField);
+
+            if(isFinished()) {
+                sendResults(getResults());
+                return false;
+            }
 
             return true;
         }

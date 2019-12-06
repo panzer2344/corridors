@@ -17,6 +17,7 @@ public class ConnectValidator implements Validator<UIPoint> {
         for(UILine connection : initiator.getConnections()) {
             isConnected = point.equals(connection.getVertex().a) ||
                           point.equals(connection.getVertex().b);
+            if(isConnected) break;
         }
 
         return isConnected;

@@ -38,5 +38,6 @@ public class ClientImpl implements Client {
         messageFrame.setVisible(true);
 
         JOptionPane.showMessageDialog(messageFrame, gameResults.toString());
+        System.out.println("Finish: " + gameResults.toString());
     }
 }

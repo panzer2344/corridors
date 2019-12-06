@@ -6,15 +6,15 @@ import ru.corridors.rmi.server.Server;
 
 import java.rmi.RemoteException;
 
-public class FillLineHandler {
+public class RegisterStepAction {
 
-    public static final FillLineHandler instance = new FillLineHandler();
+    public static final RegisterStepAction instance = new RegisterStepAction();
 
     private Server serverStub;
 
-    private FillLineHandler() {}
+    private RegisterStepAction() {}
 
-    public void handle(StepInfo stepInfo) {
+    public void doAction(StepInfo stepInfo) {
         try {
             serverStub.registerStep(stepInfo, ClientInfoContainer.instance.getClientInfo());
         } catch (RemoteException e) {

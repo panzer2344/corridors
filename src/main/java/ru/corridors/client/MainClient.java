@@ -2,7 +2,7 @@ package ru.corridors.client;
 
 import ru.corridors.dto.ClientInfo;
 import ru.corridors.gui.ClientGUI;
-import ru.corridors.gui.handler.FillLineHandler;
+import ru.corridors.gui.handler.RegisterStepAction;
 import ru.corridors.gui.validator.FillLineValidator;
 import ru.corridors.rmi.client.Client;
 import ru.corridors.rmi.client.ClientImpl;
@@ -31,7 +31,7 @@ public class MainClient {
 
         ClientInfoContainer.instance.setClientInfo(clientInfo);
 
-        FillLineHandler.instance.setServerStub(server);
+        RegisterStepAction.instance.setServerStub(server);
         FillLineValidator.instance.setServerStub(server);
 
     }

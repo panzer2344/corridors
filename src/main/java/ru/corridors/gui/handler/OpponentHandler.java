@@ -1,9 +1,11 @@
 package ru.corridors.gui.handler;
 
+import ru.corridors.client.ClientInfoContainer;
 import ru.corridors.dto.Point;
 import ru.corridors.dto.StepInfo;
 import ru.corridors.gui.GameFieldUI;
 import ru.corridors.gui.model.State;
+import ru.corridors.gui.model.UILine;
 import ru.corridors.gui.model.UIPoint;
 
 public class OpponentHandler {
@@ -24,7 +26,15 @@ public class OpponentHandler {
         UIPoint from = gameFieldUI.getPoints().get(fromIndexVert).get(fromIndexHoriz);
         UIPoint to = gameFieldUI.getPoints().get(toIndexVert).get(toIndexHoriz);
 
-        from.setState(State.ACTIVE_SECOND_PLAYER);
-        to.setState(State.ACTIVE_SECOND_PLAYER);
+        System.out.println("handle for " + ClientInfoContainer.instance.getClientInfo());
+
+        if(from.getState().isChangableState()) from.setState(State.ACTIVE_SECOND_PLAYER);
+        if(from.getState().isChangableState()) to.setState(State.ACTIVE_SECOND_PLAYER);
+
+        UILine connectionLine = from.getConnection(to);
+        if(connectionLine != null) {
+            connectionLine.setState(State.ACTIVE_SECOND_PLAYER);
+        }
+
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class GameFieldUI extends JComponent {
 
-    private static final int pointRadius = 5;
+    private static final int pointRadius = 6;
     private static final int linesCountY = ServerImpl.DEFAULT_SQUARE_COUNT;
 
     private List<List<UIPoint>> points;
