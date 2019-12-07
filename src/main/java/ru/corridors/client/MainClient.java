@@ -22,17 +22,27 @@ public class MainClient {
         ClientGUI clientGUI = new ClientGUI();
         Client client = new ClientImpl(clientGUI);
 
-        Registry registry = LocateRegistry.getRegistry("localhost", 2732);
-        Server server = (Server) registry.lookup(ClientImpl.UNIQUE_BINDING_SERVER_NAME);
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 2732);
+            Server server = (Server) registry.lookup(ClientImpl.UNIQUE_BINDING_SERVER_NAME);
 
-        ClientInfo clientInfo = server.registerClient();
-        Remote stub = UnicastRemoteObject.exportObject(client, 0);
-        registry.bind(ClientImpl.UNIQUE_BINDING_CLIENT_PREFIX + clientInfo.getOrderNumber(), stub);
+            ClientInfo clientInfo = server.registerClient();
+            Remote stub = UnicastRemoteObject.exportObject(client, 0);
+            registry.bind(ClientImpl.UNIQUE_BINDING_CLIENT_PREFIX + clientInfo.getOrderNumber(), stub);
 
-        ClientInfoContainer.instance.setClientInfo(clientInfo);
+            server.sayReadyToStart(clientInfo);
 
-        RegisterStepAction.instance.setServerStub(server);
-        FillLineValidator.instance.setServerStub(server);
+            ClientInfoContainer.instance.setClientInfo(clientInfo);
+
+            RegisterStepAction.instance.setServerStub(server);
+            FillLineValidator.instance.setServerStub(server);
+
+            clientGUI.setTitle("Player: " + clientInfo.getOrderNumber());
+        } catch ( Throwable t) {
+            t.printStackTrace();
+        }
+
+        clientGUI.setVisible(true);
 
     }
 }

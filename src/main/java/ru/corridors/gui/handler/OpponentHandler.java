@@ -26,10 +26,10 @@ public class OpponentHandler {
         UIPoint from = gameFieldUI.getPoints().get(fromIndexVert).get(fromIndexHoriz);
         UIPoint to = gameFieldUI.getPoints().get(toIndexVert).get(toIndexHoriz);
 
-        System.out.println("handle for " + ClientInfoContainer.instance.getClientInfo());
+        System.out.println("handle for " + ClientInfoContainer.instance.getOpponentInfo());
 
         if(from.getState().isChangableState()) from.setState(State.ACTIVE_SECOND_PLAYER);
-        if(from.getState().isChangableState()) to.setState(State.ACTIVE_SECOND_PLAYER);
+        if(to.getState().isChangableState()) to.setState(State.ACTIVE_SECOND_PLAYER);
 
         UILine connectionLine = from.getConnection(to);
         if(connectionLine != null) {

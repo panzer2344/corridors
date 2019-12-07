@@ -85,11 +85,8 @@ public class UIPoint extends JComponent {
     }
 
     public UILine getConnection(UIPoint anotherPoint) {
-        //System.out.println("this._x " + _x + " this._y" + _y + "another._x " + anotherPoint._x + "another._y " + anotherPoint._y);
         for(UILine connectedLine : connections) {
-            //System.out.println(connectedLine);
             if(connectedLine.getVertex().a.equals(anotherPoint) || connectedLine.getVertex().b.equals(anotherPoint)) {
-                //System.out.println("connected");
                 return connectedLine;
             }
         }

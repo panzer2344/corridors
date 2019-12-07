@@ -69,40 +69,10 @@ public class ClickHandler implements MouseListener {
                     lastMissedPoint = point;
                     missedPointPrevState = lastMissedPoint.getState();
                     lastMissedPoint.setState(State.MISSED_POINT);
-                    //first.setState(State.NOT_ACTIVE_POINT);
                     first.setState(firstPointPrevState);
 
                     clearLinks();
                 }
-//                if(new ConnectValidator(first).isValid(point)) {
-//                    second = point;
-//
-//                    StepInfo stepInfo = buildStepInfo(first, second);
-//
-//                    if(fillLineValidator.isValid(stepInfo)) {
-//                        first.setState(State.ACTIVE_FIRST_PLAYER);
-//                        second.setState(State.ACTIVE_FIRST_PLAYER);
-//
-//                        UILine connectionLine = first.getConnection(second);
-//                        if(connectionLine != null) {
-//                            connectionLine.setState(State.ACTIVE_FIRST_PLAYER);
-//                        }
-//
-//                        registerStepAction.doAction(stepInfo);
-//
-//                        clearLinks();
-//                    } else {
-//                        second = null;
-//                    }
-//
-//                } else {
-//                    lastMissedPoint = point;
-//                    missedPointPrevState = lastMissedPoint.getState();
-//                    lastMissedPoint.setState(State.MISSED_POINT);
-//                    first.setState(State.NOT_ACTIVE_POINT);
-//
-//                    clearLinks();
-//                }
             }
         } else {
             clearLinks();
@@ -127,8 +97,17 @@ public class ClickHandler implements MouseListener {
     }
 
     private StepInfo buildStepInfo(UIPoint from, UIPoint to){
+        UIPoint inStepFirstPoint = from;
+        UIPoint inStepSecondPoint = to;
+
+        if(from.getIndexHor() > to.getIndexHor() ||
+            from.getIndexHor() == to.getIndexHor() && from.getIndexVert() > to.getIndexVert() ) {
+            inStepFirstPoint = to;
+            inStepSecondPoint = from;
+        }
+
         return new StepInfo(new Line(
-                new Point(from.getIndexHor(), from.getIndexVert()),
-                new Point(to.getIndexHor(), to.getIndexVert())));
+                new Point(inStepFirstPoint.getIndexHor(), inStepFirstPoint.getIndexVert()),
+                new Point(inStepSecondPoint.getIndexHor(), inStepSecondPoint.getIndexVert())));
     }
 }

@@ -5,7 +5,6 @@ import ru.corridors.gui.model.UIPoint;
 import ru.corridors.rmi.server.ServerImpl;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,12 +16,11 @@ public class GameFieldUI extends JComponent {
     private List<List<UIPoint>> points;
     private List<List<UILine>> lines;
 
+    private final int yOffset = 50;
+
     public GameFieldUI() {
         super();
-
-        setLocation(0, 0);
-        setSize(200, 200);
-        setBackground(Color.DARK_GRAY);
+        setSize(400, 400);
 
         initPoints();
         initLines();
@@ -38,7 +36,7 @@ public class GameFieldUI extends JComponent {
             List<UIPoint> row = new ArrayList<>(linesCountY + 1);
 
             for(int j = 0; j < linesCountY + 1; j++) {
-                UIPoint uiPoint = new UIPoint(x, y, pointRadius);
+                UIPoint uiPoint = new UIPoint(x, y + yOffset, pointRadius);
                 uiPoint.setIndexVert(i);
                 uiPoint.setIndexHor(j);
 

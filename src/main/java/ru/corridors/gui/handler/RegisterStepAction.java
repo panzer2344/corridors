@@ -15,11 +15,13 @@ public class RegisterStepAction {
     private RegisterStepAction() {}
 
     public void doAction(StepInfo stepInfo) {
-        try {
-            serverStub.registerStep(stepInfo, ClientInfoContainer.instance.getClientInfo());
-        } catch (RemoteException e) {
-            System.out.println("Error! " + e.getMessage());
-        }
+            new Thread(() -> {
+                try {
+                    serverStub.registerStep(stepInfo, ClientInfoContainer.instance.getClientInfo());
+                } catch (RemoteException e) {
+                    System.out.println("Error! " + e.getMessage());
+                }
+            }).start();
     }
 
     public void setServerStub(Server serverStub) {

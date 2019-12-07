@@ -5,6 +5,8 @@ import java.util.Objects;
 
 public class StepInfo implements Serializable {
     private Line line;
+    private int countOfSquares = 0;
+    private ClientInfo filledSqureBy;
 
     public StepInfo(Line line) {
         this.line = line;
@@ -22,23 +24,38 @@ public class StepInfo implements Serializable {
         return Math.max(line.getHorizontalLength(), line.getVerticalLength());
     }
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        StepInfo stepInfo = (StepInfo) object;
-        return Objects.equals(line, stepInfo.line);
+    public ClientInfo getFilledSqureBy() {
+        return filledSqureBy;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(line);
+    public void incCountOfSquares(ClientInfo filledSqureBy) {
+        this.filledSqureBy = filledSqureBy;
+        countOfSquares++;
+    }
+
+    public int getCountOfSquares() {
+        return countOfSquares;
     }
 
     @Override
     public String toString() {
         return "StepInfo{" +
                 "line=" + line +
+                ", filledSqureBy=" + filledSqureBy +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        StepInfo stepInfo = (StepInfo) object;
+        return Objects.equals(line, stepInfo.line) &&
+                Objects.equals(filledSqureBy, stepInfo.filledSqureBy);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(line, filledSqureBy);
     }
 }

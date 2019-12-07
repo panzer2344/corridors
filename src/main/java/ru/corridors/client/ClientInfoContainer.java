@@ -7,6 +7,7 @@ public class ClientInfoContainer {
     public static final ClientInfoContainer instance = new ClientInfoContainer();
 
     private ClientInfo clientInfo;
+    private ClientInfo opponentInfo;
 
     private ClientInfoContainer() {}
 
@@ -16,5 +17,13 @@ public class ClientInfoContainer {
 
     public ClientInfo getClientInfo() {
         return clientInfo;
+    }
+
+    public ClientInfo getOpponentInfo() {
+        return opponentInfo;
+    }
+
+    public void setOpponentInfo(ClientInfo opponentInfo) {
+        this.opponentInfo = opponentInfo;
     }
 }

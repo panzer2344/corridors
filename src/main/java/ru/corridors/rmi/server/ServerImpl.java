@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerImpl implements Server {
-    public static final int DEFAULT_SQUARE_COUNT = 2;
+    public static final int DEFAULT_SQUARE_COUNT = 5;
 
     private static int clientCount = 0;
     private static int currentClient = 0;
@@ -24,9 +24,6 @@ public class ServerImpl implements Server {
     private static final GameField gameField = new GameField(DEFAULT_SQUARE_COUNT);
 
     private static final Map<Integer, ClientInfo> clientsMap = new ConcurrentHashMap<>();
-
-//    private Client client1;
-//    private Client client2;
 
     private static final Map<Integer, Client> clientsStubMap = new ConcurrentHashMap<>();
 
@@ -45,10 +42,22 @@ public class ServerImpl implements Server {
         System.out.println("Client with id#" + clientInfo.getOrderNumber() + " was registered");
         System.out.println("Current client count: " + clientCount);
 
-        if(clientCount >= 2)
-            startGame();
-
         return clientInfo;
+    }
+
+    @Override
+    public void sayReadyToStart(ClientInfo clientInfo) throws RemoteException {
+        try {
+            Client clientStub = (Client) registry.lookup(UNIQUE_BINDING_CLIENT_PREFIX + clientInfo.getOrderNumber());
+            clientsStubMap.put(clientInfo.getOrderNumber(), clientStub);
+
+            if(clientsStubMap.size() >= 2) {
+                startGame();
+                sendOpponentsInfo(clientInfo);
+            }
+        } catch (NotBoundException e) {
+            throw new RemoteException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -69,10 +78,6 @@ public class ServerImpl implements Server {
     public boolean registerStep(StepInfo stepInfo, ClientInfo clientInfo) throws RemoteException {
         synchronized (gameField) {
             if(currentClient != clientInfo.getOrderNumber()) return false;
-//            if(isFinished()) {
-//                sendResults(getResults());
-//                return false;
-//            }
 
             Line currentLine = stepInfo.getLine();
 
@@ -81,17 +86,22 @@ public class ServerImpl implements Server {
             if (currentLine.isHorizontalLine()) {
                 if (gameField.isLockBot(currentLine)) {
                     gameField.setLockOnBottom(currentLine, clientInfo.getOrderNumber());
-                } else if (gameField.isLockTop(currentLine)) {
+                    stepInfo.incCountOfSquares(clientInfo);
+                }
+                if (gameField.isLockTop(currentLine)) {
                     gameField.setLockOnTop(currentLine, clientInfo.getOrderNumber());
+                    stepInfo.incCountOfSquares(clientInfo);
                 }
             } else if (currentLine.isVerticalLine()) {
                 if (gameField.isLockLeft(currentLine)) {
                     gameField.setLockOnLeft(currentLine, clientInfo.getOrderNumber());
-                } else if (gameField.isLockRight(currentLine)) {
+                    stepInfo.incCountOfSquares(clientInfo);
+                }
+                if (gameField.isLockRight(currentLine)) {
                     gameField.setLockOnRight(currentLine, clientInfo.getOrderNumber());
+                    stepInfo.incCountOfSquares(clientInfo);
                 }
             }
-
 
             sendStepToAnotherPlayers(stepInfo, clientInfo);
             changeActivePlayer();
@@ -107,32 +117,41 @@ public class ServerImpl implements Server {
         }
     }
 
-    private Client getClientStub(Integer clientId) throws RemoteException {
-        Client clientStub = clientsStubMap.get(clientId);
-
-        if(clientStub == null) {
-            try {
-                clientStub = (Client) registry.lookup(UNIQUE_BINDING_CLIENT_PREFIX + clientId);
-            } catch (NotBoundException e) {
-                throw new RemoteException(e.getMessage(), e);
+    public void sendOpponentsInfo(ClientInfo clientInfo) throws RemoteException {
+        for(ClientInfo opponentInfo : clientsMap.values()) {
+            if( ! opponentInfo.equals(clientInfo)) {
+                clientsStubMap.get(clientInfo.getOrderNumber()).setOpponentInfo(opponentInfo);
+                clientsStubMap.get(opponentInfo.getOrderNumber()).setOpponentInfo(clientInfo);
+                break;
             }
-            clientsStubMap.put(clientId, clientStub);
         }
-
-        return clientStub;
     }
 
     private void startGame() throws RemoteException {
-        //Client clientStub = clientsStubMap.get(clientCount);
-        Client clientStub = getClientStub(currentClient);
-        clientStub.allowStep(true);
+        try {
+            Client clientStub = (Client) registry.lookup(UNIQUE_BINDING_CLIENT_PREFIX + 0);
+            clientStub.allowStep(true);
+        } catch (NotBoundException e) {
+            throw new RemoteException(e.getMessage(), e);
+        }
+    }
+
+    private void initClientsStubMap () throws RemoteException {
+        try {
+            for(ClientInfo clientInfo : clientsMap.values()) {
+                Client clientStub = (Client) registry.lookup(UNIQUE_BINDING_CLIENT_PREFIX + clientInfo.getOrderNumber());
+                clientsStubMap.put(clientInfo.getOrderNumber(), clientStub);
+            }
+        } catch (NotBoundException e) {
+            throw new RemoteException(e.getMessage(), e);
+        }
     }
 
     private void sendStepToAnotherPlayers(StepInfo stepInfo, ClientInfo clientInfo) throws RemoteException {
+        if(clientsStubMap.isEmpty()) initClientsStubMap();
+
         for(Map.Entry<Integer, Client> entry : clientsStubMap.entrySet()) {
-            if( !entry.getKey().equals(clientInfo.getOrderNumber())) {
-                entry.getValue().handleOpponentStep(stepInfo, clientInfo);
-            }
+            entry.getValue().handleStepResult(stepInfo, clientInfo);
         }
     }
 
@@ -151,16 +170,15 @@ public class ServerImpl implements Server {
         ClientInfo winner = null;
         int maxScore = 0;
 
+        for(ClientInfo clientInfo : clientsMap.values()) {
+            results.put(clientInfo, new ClientScore(0));
+        }
+
         for(Integer clientOrder : gameField.getSquares().values()) {
             ClientInfo clientInfo = clientsMap.get(clientOrder);
-            ClientScore clientScore = null;
-            if(results.containsKey(clientInfo)) {
-                clientScore = results.get(clientInfo);
-            } else {
-                clientScore = new ClientScore(1);
-                results.put(clientInfo, clientScore);
+            ClientScore clientScore = results.get(clientInfo);
 
-            }
+            clientScore.increase(1);
 
             if(clientScore.getSquareCount() > maxScore) {
                 maxScore = clientScore.getSquareCount();
@@ -172,9 +190,9 @@ public class ServerImpl implements Server {
     }
 
     private void changeActivePlayer() throws RemoteException {
-        getClientStub(currentClient).allowStep(false);
+        clientsStubMap.get(currentClient).allowStep(false);
         nextClient();
-        getClientStub(currentClient).allowStep(true);
+        clientsStubMap.get(currentClient).allowStep(true);
     }
 
     private int nextClient() {
@@ -184,17 +202,6 @@ public class ServerImpl implements Server {
         }
         return currentClient;
     }
-
-//    private Client getClientStub(ClientInfo clientInfo) throws RemoteException, NotBoundException {
-//        Client clientStub = clientsStubMap.get(clientInfo.getOrderNumber());
-//
-//        if(clientStub == null) {
-//            clientStub = (Client) registry.lookup(UNIQUE_BINDING_CLIENT_PREFIX + clientInfo.getOrderNumber());
-//            clientsStubMap.put(clientInfo.getOrderNumber(), clientStub);
-//        }
-//
-//        return clientStub;
-//    }
 
     public static void main(String[] args) throws RemoteException, AlreadyBoundException, InterruptedException {
         Server server = new ServerImpl();

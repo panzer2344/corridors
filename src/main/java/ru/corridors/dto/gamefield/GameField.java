@@ -50,27 +50,23 @@ public class GameField implements Serializable {
     }
 
     public boolean isLockLeft(Line line) {
-        return isLockSide(line, getPossibleLeftNeighbors(line));
+        return ! isLeftBoundary(line) && isLockSide(getPossibleLeftNeighbors(line));
     }
 
     public boolean isLockRight(Line line) {
-        return isLockSide(line, getPossibleRightNeighbors(line));
+        return ! isRightBoundary(line) && isLockSide(getPossibleRightNeighbors(line));
     }
 
     public boolean isLockTop(Line line) {
-        return isLockSide(line, getPossibleTopNeighbors(line));
+        return ! isTopBoundary(line) && isLockSide(getPossibleTopNeighbors(line));
     }
 
     public boolean isLockBot(Line line) {
-        return isLockSide(line, getPossibleBotNeighbors(line));
+        return ! isBottomBoundary(line) && isLockSide(getPossibleBotNeighbors(line));
     }
 
-    private boolean isLockSide(Line line, List<Line> sideLines) {
+    private boolean isLockSide(List<Line> sideLines) {
         boolean isLockSide = true;
-
-//        for(Line neighbor : sideLines) {
-//            if ( ! sideLines.contains )
-//        }
 
         for(Line neighbor : sideLines) {
             if( ! lines.contains(neighbor) ) {
@@ -160,21 +156,25 @@ public class GameField implements Serializable {
 
     public void setLockOnBottom(Line line, Integer clientOrder) {
         squares.put(getOnLockSquarePoint(line, 0, -1), clientOrder);
+        System.out.println("set lock: " + getOnLockSquarePoint(line, 0, -1));
         filledSquaresCount++;
     }
 
     public void setLockOnTop(Line line, Integer clientOrder) {
         squares.put(getOnLockSquarePoint(line, 0, 0), clientOrder);
+        System.out.println("set lock: " + getOnLockSquarePoint(line, 0, 0));
         filledSquaresCount++;
     }
 
     public void setLockOnLeft(Line line, Integer clientOrder) {
         squares.put(getOnLockSquarePoint(line, -1, 0), clientOrder);
+        System.out.println("set lock: " + getOnLockSquarePoint(line, -1, 0));
         filledSquaresCount++;
     }
 
     public void setLockOnRight(Line line, Integer clientOrder) {
         squares.put(getOnLockSquarePoint(line, 0, 0), clientOrder);
+        System.out.println("set lock: " + getOnLockSquarePoint(line, 0, 0));
         filledSquaresCount++;
     }
 

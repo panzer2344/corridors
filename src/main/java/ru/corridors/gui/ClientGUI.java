@@ -1,6 +1,7 @@
 package ru.corridors.gui;
 
 import ru.corridors.gui.handler.OpponentHandler;
+import ru.corridors.gui.model.UIScore;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,10 +9,13 @@ import java.awt.*;
 public class ClientGUI extends JFrame {
 
     private GameFieldUI gameFieldUI;
+    private UIScore uiScore;
 
     private OpponentHandler opponentHandler;
 
     public ClientGUI() throws HeadlessException {
+        super("Game");
+
         setBounds(100, 100, 500, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -20,13 +24,18 @@ public class ClientGUI extends JFrame {
         gameFieldUI = new GameFieldUI();
         getContentPane().add(gameFieldUI);
 
-        opponentHandler = new OpponentHandler(gameFieldUI);
+        uiScore = new UIScore();
+        getContentPane().add(uiScore, BorderLayout.CENTER);
 
-        setVisible(true);
+        opponentHandler = new OpponentHandler(gameFieldUI);
     }
 
     public OpponentHandler getOpponentHandler() {
         return opponentHandler;
+    }
+
+    public UIScore getUiScore() {
+        return uiScore;
     }
 
     // for tests
